@@ -1,9 +1,6 @@
 package com.telnyx.webrtc.composevoicesample.ui.shared
 
 import android.content.Context
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.telnyx.webrtc.sdk.Call
@@ -14,7 +11,6 @@ import com.telnyx.webrtc.sdk.model.TxServerConfiguration
 import com.telnyx.webrtc.sdk.verto.receive.InviteResponse
 import com.telnyx.webrtc.sdk.verto.receive.ReceivedMessageBody
 import com.telnyx.webrtc.sdk.verto.receive.SocketObserver
-import com.telnyx.webrtc.sdk.verto.receive.SocketResponse
 import timber.log.Timber
 import java.util.*
 
