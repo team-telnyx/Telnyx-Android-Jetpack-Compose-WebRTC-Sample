@@ -11,6 +11,7 @@ import com.telnyx.webrtc.sdk.model.TxServerConfiguration
 import com.telnyx.webrtc.sdk.verto.receive.InviteResponse
 import com.telnyx.webrtc.sdk.verto.receive.ReceivedMessageBody
 import com.telnyx.webrtc.sdk.verto.receive.SocketObserver
+import com.telnyx.webrtc.sdk.verto.receive.SocketResponse
 import timber.log.Timber
 import java.util.*
 
@@ -36,7 +37,7 @@ class BaseViewModel : ViewModel() {
 
     val clientReadyState = MutableLiveData(false)
     val loginState = MutableLiveData(false)
-    val errorState: MutableLiveData<String> = MutableLiveData()
+    val errorState: MutableLiveData<String?> = MutableLiveData()
 
     lateinit var incomingCallDetails: InviteResponse
     val callState: MutableLiveData<CallState> = MutableLiveData(CallState.IDLE)
@@ -46,9 +47,9 @@ class BaseViewModel : ViewModel() {
     fun initConnection(context: Context, providedServerConfig: TxServerConfiguration? = null) {
         telnyxClient = TelnyxClient(context)
         providedServerConfig?.let {
-            telnyxClient?.connect(it)
+            telnyxClient?.connect(it,null)
         } ?: run {
-            telnyxClient?.connect()
+            telnyxClient?.connect(TxServerConfiguration(),null)
         }
     }
 
@@ -60,7 +61,7 @@ class BaseViewModel : ViewModel() {
     fun sendInvite(
         destinationNumber: String,
     ) {
-        telnyxClient?.call?.newInvite(
+        telnyxClient?.newInvite(
             storedCredentialConfig.sipCallerIDName ?: "User",
             storedCredentialConfig.sipCallerIDNumber ?: "000000",
             destinationNumber,
@@ -69,15 +70,14 @@ class BaseViewModel : ViewModel() {
     }
 
     fun acceptCall(callId: UUID, destinationNumber: String) {
-        telnyxClient?.call?.acceptCall(callId, destinationNumber)
+        telnyxClient?.acceptCall(callId, destinationNumber)
     }
 
     fun endCall(callId: UUID? = null) {
         callId?.let {
-            telnyxClient?.call?.endCall(callId)
+            telnyxClient?.endCall(callId)
         } ?: run {
-            val clientCallId = telnyxClient?.call?.callId
-            clientCallId?.let { telnyxClient?.call?.endCall(it) }
+            currentCall?.endCall(currentCall?.callId!!)
         }
         previousCall?.let {
             currentCall = it
@@ -87,6 +87,10 @@ class BaseViewModel : ViewModel() {
     fun observerResponses() {
         telnyxClient?.getSocketResponse()
             ?.observeForever(object : SocketObserver<ReceivedMessageBody>() {
+                override fun onChanged(value: SocketResponse<ReceivedMessageBody>) {
+
+                }
+
                 override fun onConnectionEstablished() {
                     // Handle a successfully established connection
                     Timber.i("BaseViewModel :: Connection Established")
@@ -129,6 +133,10 @@ class BaseViewModel : ViewModel() {
 
                 override fun onLoading() {
                     Timber.i("BaseViewModel :: Loading")
+                }
+
+                override fun onSocketDisconnect() {
+
                 }
 
                 override fun onError(message: String?) {

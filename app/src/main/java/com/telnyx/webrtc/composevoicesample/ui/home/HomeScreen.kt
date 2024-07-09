@@ -63,6 +63,7 @@ fun CallArea(baseViewModel: BaseViewModel) {
         BaseViewModel.CallState.IDLE -> HomeInviteArea(baseViewModel)
         BaseViewModel.CallState.INCOMING -> IncomingCall(baseViewModel)
         BaseViewModel.CallState.ONGOING -> OngoingCall(baseViewModel)
+        null ->  HomeInviteArea(baseViewModel)
     }
 }
 
